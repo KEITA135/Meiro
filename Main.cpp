@@ -35,11 +35,11 @@ void Main()
 		for (int i = 0;i < N;i++) {
 			for (int j = 0;j < M;j++) {
 				Rect(600.0 / M * j + 100, 600.0 / N * i, 600.0 / M, 600.0 / N).draw(Palette::Yellow).drawFrame(1.0, Palette::Black);
-				Road.resized(min(600.0 / N, 600.0 / M)).draw(600.0 / M * j + 100, 600.0 / N * i);
+				Road.resized(600.0 / M, 600.0 / N).draw(600.0 / M * j + 100, 600.0 / N * i);
 				if (chizu[i][j] == '#') {
 					Line(600.0 / M * j + 100, 600.0 / N * i, 600.0 / M * (j + 1) + 100, 600.0 / N * (i + 1)).draw(1.0, Palette::Black);
 					Line(600.0 / M * (j + 1) + 100, 600.0 / N * i, 600.0 / M * j + 100, 600.0 / N * (i + 1)).draw(1.0, Palette::Black);
-					Wall.resized(min(600.0 / N, 600.0 / M)).draw(600.0 / M * j + 100, 600.0 / N * i);
+					Wall.resized(600.0 / M, 600.0 / N).draw(600.0 / M * j + 100, 600.0 / N * i);
 				}
 				if (chizu[i][j] == 's') {
 					Circle(600.0 / M * (2 * j + 1) / 2 + 100, 600.0 / N * (2 * i + 1) / 2, min(600.0 / N, 600.0 / M) / 2 - 2).draw(Palette::Blue);
