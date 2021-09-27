@@ -1,8 +1,32 @@
 ﻿
 # include <Siv3D.hpp> // OpenSiv3D v0.4.3
+# include <vector>
 # include <fstream>
 # include <filesystem>
 using namespace std;
+
+struct block {
+	string id;
+	String name;
+	int through;
+
+	block(){}
+
+	block(string id) {
+		this->id = id;
+	}
+
+	block(string id, String name) {
+		this->id = id;
+		this->name = name;
+	}
+
+	block(string id, String name, int through) {
+		this->id = id;
+		this->name = name;
+		this->through = through;
+	}
+};
 
 void Main()
 {
@@ -12,26 +36,47 @@ void Main()
 	cin.rdbuf(in.rdbuf());
 	int N, M;
 	cin >> N >> M;
-	vector<vector<char>> chizu(N, vector<char>(M));
+	vector<vector<block>> chizu(N, vector<block>(M));
 	const Texture Wall(Resource(U"Wall.jpg"));
 	const Texture Road(Resource(U"Road.jpg"));
 	const Texture Back(Resource(U"Back.jpg"));
 	const Texture Key(Emoji(U"🔑"));
 	
+	int question = 0;
 	for (int i = 0;i < N;i++) {
-		for (int j = 0;j < M;j++) cin >> chizu[i][j];
+		for (int j = 0;j < M;j++) {
+			char a;
+			cin >> a;
+			if (a == '.') chizu[i][j] = block(".");
+			else if (a == '#') chizu[i][j] = block("#");
+			else if (a == 's') chizu[i][j] = block("s");
+			else if (a == 'g') chizu[i][j] = block("g");
+			else if (a == '?') {
+				question++;
+			}
+		}
+	}
+	
+	for (int i = 0;i < question;i++) {
+		int a, b;
+		cin >> a >> b;
+		string id;
+		cin >> id;
+		if (id == "Key") {
+			String name;
+			cin >> name;
+			chizu[a][b] = block("Key", name,0);
+		}
+		if (id == "Door") {
+			String name;
+			cin >> name;
+			chizu[a][b] = block("Door", name);
+		}
 	}
 	
 	Scene::SetBackground(Palette::Cyan);
 	Window::SetTitle(U"Meiro");
 	const Font fontHeavy(30,Typeface::Heavy);
-
-	//鍵の基本処理
-	set<char> kagi;
-	for (char i = 'a';i <= 'z';i++) kagi.insert(i);
-	kagi.erase('s');
-	kagi.erase('g');
-	map<char, bool> opened;
 
 	bool firstframe = true;
 	pair<int, int> me = { 0,0 };
@@ -44,29 +89,28 @@ void Main()
 			for (int j = 0;j < M;j++) {
 				Rect(600.0 / M * j + 100, 600.0 / N * i, 600.0 / M, 600.0 / N).draw(Palette::Yellow).drawFrame(1.0, Palette::Black);
 				Road.resized(600.0 / M, 600.0 / N).draw(600.0 / M * j + 100, 600.0 / N * i);
-				if (chizu[i][j] == '#') {
+				if (chizu[i][j].id == "#") {
 					Line(600.0 / M * j + 100, 600.0 / N * i, 600.0 / M * (j + 1) + 100, 600.0 / N * (i + 1)).draw(1.0, Palette::Black);
 					Line(600.0 / M * (j + 1) + 100, 600.0 / N * i, 600.0 / M * j + 100, 600.0 / N * (i + 1)).draw(1.0, Palette::Black);
 					Wall.resized(600.0 / M, 600.0 / N).draw(600.0 / M * j + 100, 600.0 / N * i);
 				}
-				if (chizu[i][j] == 's') {
+				if (chizu[i][j].id == "s") {
 					Circle(600.0 / M * (2 * j + 1) / 2 + 100, 600.0 / N * (2 * i + 1) / 2, min(600.0 / N, 600.0 / M) / 2 - 2).draw(Palette::Blue);
 					if (firstframe) {
 						me = { i,j };
 						walked.push_back(me);
 					}
 				}
-				if (chizu[i][j] == 'g') {
+				if (chizu[i][j].id == "g") {
 					Circle(600.0 / M * (2 * j + 1) / 2 + 100, 600.0 / N * (2 * i + 1) / 2, min(600.0 / N, 600.0 / M) / 2 - 2).draw(Palette::Red);
 				}
 
 				//鍵の描画
-				if (kagi.count(chizu[i][j])) {
-					if (firstframe) opened[chizu[i][j]] = false;
-					if (!opened[chizu[i][j]]) {
+				if (chizu[i][j].id == "Key") {
+					if (chizu[i][j].through == 0) {
 						Key.resized(600.0 / M, 600.0 / N).draw(600.0 / M * j + 100, 600.0 / N * i);
-						fontHeavy(U"{}"_fmt(chizu[i][j]-'a'+1)).drawAt(600.0 / M * (2 * j + 1) / 2 + 100+2, 600.0 / N * (2 * i + 1) / 2+2,Palette::Gray);
-						fontHeavy(U"{}"_fmt(chizu[i][j] - 'a' + 1)).drawAt(600.0 / M * (2 * j + 1) / 2 + 100, 600.0 / N * (2 * i + 1) / 2);
+						fontHeavy(U"{}"_fmt(chizu[i][j].name)).drawAt(600.0 / M * (2 * j + 1) / 2 + 100+2, 600.0 / N * (2 * i + 1) / 2+2,Palette::Gray);
+						fontHeavy(U"{}"_fmt(chizu[i][j].name)).drawAt(600.0 / M * (2 * j + 1) / 2 + 100, 600.0 / N * (2 * i + 1) / 2);
 					}
 				}
 			}
@@ -79,7 +123,7 @@ void Main()
 		//移動処理
 		if (KeyUp.down()||KeyW.down()) {
 			pair<int, int> after = { me.first-1,me.second };
-			if (after.first != -1 && chizu[after.first][after.second] != '#') {
+			if (after.first != -1 && chizu[after.first][after.second].id != "#") {
 				if (walked.size() >= 2 && walked[walked.size() - 2] == after) walked.pop_back();
 				else walked.push_back(after);
 				me = after;
@@ -87,7 +131,7 @@ void Main()
 		}
 		if (KeyDown.down()||KeyS.down()) {
 			pair<int, int> after = { me.first + 1,me.second };
-			if (after.first != N && chizu[after.first][after.second] != '#') {
+			if (after.first != N && chizu[after.first][after.second].id != "#") {
 				if (walked.size() >= 2 && walked[walked.size() - 2] == after) walked.pop_back();
 				else walked.push_back(after);
 				me = after;
@@ -95,7 +139,7 @@ void Main()
 		}
 		if (KeyLeft.down()||KeyA.down()) {
 			pair<int, int> after = { me.first ,me.second-1 };
-			if (after.second != -1 && chizu[after.first][after.second] != '#') {
+			if (after.second != -1 && chizu[after.first][after.second].id != "#") {
 				if (walked.size() >= 2 && walked[walked.size() - 2] == after) walked.pop_back();
 				else walked.push_back(after);
 				me = after;
@@ -103,7 +147,7 @@ void Main()
 		}
 		if (KeyRight.down()||KeyD.down()) {
 			pair<int, int> after = { me.first ,me.second+1 };
-			if (after.second != M && chizu[after.first][after.second] != '#') {
+			if (after.second != M && chizu[after.first][after.second].id != "#") {
 				if (walked.size() >= 2 && walked[walked.size() - 2] == after) walked.pop_back();
 				else walked.push_back(after);
 				me = after;
