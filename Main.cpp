@@ -1,6 +1,5 @@
 ﻿
 # include <Siv3D.hpp> // OpenSiv3D v0.4.3
-# include <bits/stdc++.h>
 # include <fstream>
 # include <filesystem>
 using namespace std;
@@ -17,6 +16,7 @@ void Main()
 	const Texture Wall(Resource(U"Wall.jpg"));
 	const Texture Road(Resource(U"Road.jpg"));
 	const Texture Back(Resource(U"Back.jpg"));
+	const Texture Key(Emoji(U"🔑"));
 	
 	for (int i = 0;i < N;i++) {
 		for (int j = 0;j < M;j++) cin >> chizu[i][j];
@@ -24,6 +24,14 @@ void Main()
 	
 	Scene::SetBackground(Palette::Cyan);
 	Window::SetTitle(U"Meiro");
+	const Font fontHeavy(30,Typeface::Heavy);
+
+	//鍵の基本処理
+	set<char> kagi;
+	for (char i = 'a';i <= 'z';i++) kagi.insert(i);
+	kagi.erase('s');
+	kagi.erase('g');
+	map<char, bool> opened;
 
 	bool firstframe = true;
 	pair<int, int> me = { 0,0 };
@@ -50,6 +58,16 @@ void Main()
 				}
 				if (chizu[i][j] == 'g') {
 					Circle(600.0 / M * (2 * j + 1) / 2 + 100, 600.0 / N * (2 * i + 1) / 2, min(600.0 / N, 600.0 / M) / 2 - 2).draw(Palette::Red);
+				}
+
+				//鍵の描画
+				if (kagi.count(chizu[i][j])) {
+					if (firstframe) opened[chizu[i][j]] = false;
+					if (!opened[chizu[i][j]]) {
+						Key.resized(600.0 / M, 600.0 / N).draw(600.0 / M * j + 100, 600.0 / N * i);
+						fontHeavy(U"{}"_fmt(chizu[i][j]-'a'+1)).drawAt(600.0 / M * (2 * j + 1) / 2 + 100+2, 600.0 / N * (2 * i + 1) / 2+2,Palette::Gray);
+						fontHeavy(U"{}"_fmt(chizu[i][j] - 'a' + 1)).drawAt(600.0 / M * (2 * j + 1) / 2 + 100, 600.0 / N * (2 * i + 1) / 2);
+					}
 				}
 			}
 		}
