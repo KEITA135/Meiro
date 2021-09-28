@@ -1,6 +1,7 @@
 ﻿
 # include <Siv3D.hpp> // OpenSiv3D v0.4.3
 # include <vector>
+# include <set>
 # include <fstream>
 # include <filesystem>
 using namespace std;
@@ -27,6 +28,13 @@ struct block {
 		this->through = through;
 	}
 };
+
+bool operator<(const block& a, const block& b) {
+	vector<string> dict = { a.id,b.id };
+	sort(dict.begin(), dict.end());
+	if (dict[0] == a.id) return true;
+	else return false;
+}
 
 void Main()
 {
@@ -81,6 +89,7 @@ void Main()
 	bool firstframe = true;
 	pair<int, int> me = { 0,0 };
 	vector<pair<int, int>> walked(0);
+	set<block> haveItem;
 	while (System::Update()) {
 
 		//マップの描画
@@ -124,6 +133,11 @@ void Main()
 		if (KeyUp.down()||KeyW.down()) {
 			pair<int, int> after = { me.first-1,me.second };
 			if (after.first != -1 && chizu[after.first][after.second].id != "#") {
+				if (chizu[after.first][after.second].id == "Key"&& chizu[after.first][after.second].through == 0) {
+					haveItem.insert(block());
+					chizu[after.first][after.second].through = 1;
+				}
+
 				if (walked.size() >= 2 && walked[walked.size() - 2] == after) walked.pop_back();
 				else walked.push_back(after);
 				me = after;
@@ -132,6 +146,11 @@ void Main()
 		if (KeyDown.down()||KeyS.down()) {
 			pair<int, int> after = { me.first + 1,me.second };
 			if (after.first != N && chizu[after.first][after.second].id != "#") {
+				if (chizu[after.first][after.second].id == "Key" && chizu[after.first][after.second].through == 0) {
+					haveItem.insert(chizu[after.first][after.second]);
+					chizu[after.first][after.second].through = 1;
+				}
+
 				if (walked.size() >= 2 && walked[walked.size() - 2] == after) walked.pop_back();
 				else walked.push_back(after);
 				me = after;
@@ -140,6 +159,11 @@ void Main()
 		if (KeyLeft.down()||KeyA.down()) {
 			pair<int, int> after = { me.first ,me.second-1 };
 			if (after.second != -1 && chizu[after.first][after.second].id != "#") {
+				if (chizu[after.first][after.second].id == "Key" && chizu[after.first][after.second].through == 0) {
+					haveItem.insert(chizu[after.first][after.second]);
+					chizu[after.first][after.second].through = 1;
+				}
+
 				if (walked.size() >= 2 && walked[walked.size() - 2] == after) walked.pop_back();
 				else walked.push_back(after);
 				me = after;
@@ -148,6 +172,11 @@ void Main()
 		if (KeyRight.down()||KeyD.down()) {
 			pair<int, int> after = { me.first ,me.second+1 };
 			if (after.second != M && chizu[after.first][after.second].id != "#") {
+				if (chizu[after.first][after.second].id == "Key" && chizu[after.first][after.second].through == 0) {
+					haveItem.insert(chizu[after.first][after.second]);
+					chizu[after.first][after.second].through = 1;
+				}
+
 				if (walked.size() >= 2 && walked[walked.size() - 2] == after) walked.pop_back();
 				else walked.push_back(after);
 				me = after;
