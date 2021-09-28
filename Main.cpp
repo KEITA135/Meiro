@@ -29,11 +29,16 @@ struct block {
 	}
 };
 
-bool operator<(const block& a, const block& b) {
-	vector<string> dict = { a.id,b.id };
-	sort(dict.begin(), dict.end());
-	if (dict[0] == a.id) return true;
+bool operator==(const block& a, const block& b) {
+	if (a.id == b.id && a.name == b.name && a.through == b.through) return true;
 	else return false;
+}
+
+bool operator<(const block& a, const block& b) {
+	if (a.id < b.id) {
+		return true;
+	}
+	return false;
 }
 
 void Main()
@@ -49,6 +54,7 @@ void Main()
 	const Texture Road(Resource(U"Road.jpg"));
 	const Texture Back(Resource(U"Back.jpg"));
 	const Texture Key(Emoji(U"🔑"));
+	const Texture Door(Emoji(U"🚪"));
 	
 	int question = 0;
 	for (int i = 0;i < N;i++) {
@@ -78,7 +84,7 @@ void Main()
 		if (id == "Door") {
 			String name;
 			cin >> name;
-			chizu[a][b] = block("Door", name);
+			chizu[a][b] = block("Door", name,0);
 		}
 	}
 	
@@ -122,6 +128,15 @@ void Main()
 						fontHeavy(U"{}"_fmt(chizu[i][j].name)).drawAt(600.0 / M * (2 * j + 1) / 2 + 100, 600.0 / N * (2 * i + 1) / 2);
 					}
 				}
+
+				//扉の描画
+				if (chizu[i][j].id == "Door") {
+					if (chizu[i][j].through==0) {
+						Door.resized(600.0 / M, 600.0 / N).draw(600.0 / M * j + 100, 600.0 / N * i);
+						fontHeavy(U"{}"_fmt(chizu[i][j].name)).drawAt(600.0 / M * (2 * j + 1) / 2 + 100 + 2, 600.0 / N * (2 * i + 1) / 2 + 2, Palette::Gray);
+						fontHeavy(U"{}"_fmt(chizu[i][j].name)).drawAt(600.0 / M * (2 * j + 1) / 2 + 100, 600.0 / N * (2 * i + 1) / 2);
+					}
+				}
 			}
 		}
 		for (int i = 1;i < walked.size();i++) {
@@ -133,53 +148,105 @@ void Main()
 		if (KeyUp.down()||KeyW.down()) {
 			pair<int, int> after = { me.first-1,me.second };
 			if (after.first != -1 && chizu[after.first][after.second].id != "#") {
+				bool move = true;
 				if (chizu[after.first][after.second].id == "Key"&& chizu[after.first][after.second].through == 0) {
-					haveItem.insert(block());
+					haveItem.insert(chizu[after.first][after.second]);
 					chizu[after.first][after.second].through = 1;
 				}
 
-				if (walked.size() >= 2 && walked[walked.size() - 2] == after) walked.pop_back();
-				else walked.push_back(after);
-				me = after;
+				if (chizu[after.first][after.second].id == "Door" && chizu[after.first][after.second].through == 0) {
+					if (haveItem.count(block("Key", chizu[after.first][after.second].name, 0))) {
+						haveItem.erase(block("Key", chizu[after.first][after.second].name, 0));
+						chizu[after.first][after.second].through = 1;
+					}
+					else {
+						move = false;
+					}
+				}
+
+				if (move) {
+					if (walked.size() >= 2 && walked[walked.size() - 2] == after) walked.pop_back();
+					else walked.push_back(after);
+					me = after;
+				}
 			}
 		}
 		if (KeyDown.down()||KeyS.down()) {
 			pair<int, int> after = { me.first + 1,me.second };
 			if (after.first != N && chizu[after.first][after.second].id != "#") {
+				bool move = true;
 				if (chizu[after.first][after.second].id == "Key" && chizu[after.first][after.second].through == 0) {
 					haveItem.insert(chizu[after.first][after.second]);
 					chizu[after.first][after.second].through = 1;
 				}
 
-				if (walked.size() >= 2 && walked[walked.size() - 2] == after) walked.pop_back();
-				else walked.push_back(after);
-				me = after;
+				if (chizu[after.first][after.second].id == "Door" && chizu[after.first][after.second].through == 0) {
+					if (haveItem.count(block("Key", chizu[after.first][after.second].name, 0))) {
+						haveItem.erase(block("Key", chizu[after.first][after.second].name, 0));
+						chizu[after.first][after.second].through = 1;
+					}
+					else {
+						move = false;
+					}
+				}
+
+				if (move) {
+					if (walked.size() >= 2 && walked[walked.size() - 2] == after) walked.pop_back();
+					else walked.push_back(after);
+					me = after;
+				}
 			}
 		}
 		if (KeyLeft.down()||KeyA.down()) {
 			pair<int, int> after = { me.first ,me.second-1 };
 			if (after.second != -1 && chizu[after.first][after.second].id != "#") {
+				bool move = true;
 				if (chizu[after.first][after.second].id == "Key" && chizu[after.first][after.second].through == 0) {
 					haveItem.insert(chizu[after.first][after.second]);
 					chizu[after.first][after.second].through = 1;
 				}
 
-				if (walked.size() >= 2 && walked[walked.size() - 2] == after) walked.pop_back();
-				else walked.push_back(after);
-				me = after;
+				if (chizu[after.first][after.second].id == "Door" && chizu[after.first][after.second].through == 0) {
+					if (haveItem.count(block("Key", chizu[after.first][after.second].name, 0))) {
+						haveItem.erase(block("Key", chizu[after.first][after.second].name, 0));
+						chizu[after.first][after.second].through = 1;
+					}
+					else {
+						move = false;
+					}
+				}
+
+				if (move) {
+					if (walked.size() >= 2 && walked[walked.size() - 2] == after) walked.pop_back();
+					else walked.push_back(after);
+					me = after;
+				}
 			}
 		}
 		if (KeyRight.down()||KeyD.down()) {
 			pair<int, int> after = { me.first ,me.second+1 };
 			if (after.second != M && chizu[after.first][after.second].id != "#") {
+				bool move = true;
 				if (chizu[after.first][after.second].id == "Key" && chizu[after.first][after.second].through == 0) {
 					haveItem.insert(chizu[after.first][after.second]);
 					chizu[after.first][after.second].through = 1;
 				}
 
-				if (walked.size() >= 2 && walked[walked.size() - 2] == after) walked.pop_back();
-				else walked.push_back(after);
-				me = after;
+				if (chizu[after.first][after.second].id == "Door" && chizu[after.first][after.second].through == 0) {
+					if (haveItem.count(block("Key", chizu[after.first][after.second].name, 0))) {
+						haveItem.erase(block("Key", chizu[after.first][after.second].name, 0));
+						chizu[after.first][after.second].through = 1;
+					}
+					else {
+						move = false;
+					}
+				}
+
+				if (move) {
+					if (walked.size() >= 2 && walked[walked.size() - 2] == after) walked.pop_back();
+					else walked.push_back(after);
+					me = after;
+				}
 			}
 		}
 
