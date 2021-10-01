@@ -54,6 +54,11 @@ void Main()
 			cin >> name;
 			chizu[a][b] = block("Door", name,0);
 		}
+		if (id == "Break") {
+			int life;
+			cin >> life;
+			chizu[a][b] = block("Break", U"", 0,life);
+		}
 	}
 	
 	Scene::SetBackground(Palette::Cyan);
@@ -103,6 +108,21 @@ void Main()
 						Door.resized(600.0 / M, 600.0 / N).draw(600.0 / M * j + 100, 600.0 / N * i);
 						fontHeavy(U"{}"_fmt(chizu[i][j].name)).drawAt(600.0 / M * (2 * j + 1) / 2 + 100 + 2, 600.0 / N * (2 * i + 1) / 2 + 2, Palette::Gray);
 						fontHeavy(U"{}"_fmt(chizu[i][j].name)).drawAt(600.0 / M * (2 * j + 1) / 2 + 100, 600.0 / N * (2 * i + 1) / 2);
+					}
+				}
+
+				//崩れる足場の描画
+				if (chizu[i][j].id == "Break") {
+					fontHeavy(U"{}"_fmt(chizu[i][j].life - chizu[i][j].through)).draw(600.0 / M * j + 100 + 2, 600.0 / N * i + 2, Palette::Gray);
+					fontHeavy(U"{}"_fmt(chizu[i][j].life - chizu[i][j].through)).draw(600.0 / M * j + 100, 600.0 / N * i);
+
+					//通行可能
+					if (chizu[i][j].through < chizu[i][j].life) {
+						
+					}
+					//通行不可
+					else {
+
 					}
 				}
 			}
@@ -160,7 +180,14 @@ void moveme(vector<vector<block>>& chizu,set<block>& haveItem,vector<pair<int,in
 		}
 	}
 
+	if (chizu[after.first][after.second].id == "Break") {
+		if (!(chizu[after.first][after.second].life - chizu[after.first][after.second].through)) {
+			move = false;
+		}
+	}
+
 	if (move) {
+		if (chizu[me.first][me.second].id == "Break") chizu[me.first][me.second].through++;
 		if (walked.size() >= 2 && walked[walked.size() - 2] == after) walked.pop_back();
 		else walked.push_back(after);
 		me = after;

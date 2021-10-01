@@ -6,6 +6,7 @@ struct block {
 	string id;
 	String name;
 	int through;
+	int life;
 
 	block() {}
 
@@ -22,6 +23,13 @@ struct block {
 		this->id = id;
 		this->name = name;
 		this->through = through;
+	}
+
+	block(string id, String name, int through,int life) {
+		this->id = id;
+		this->name = name;
+		this->through = through;
+		this->life = life;
 	}
 };
 
