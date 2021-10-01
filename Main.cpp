@@ -4,42 +4,10 @@
 # include <set>
 # include <fstream>
 # include <filesystem>
+# include "App/block.h"
 using namespace std;
 
-struct block {
-	string id;
-	String name;
-	int through;
-
-	block(){}
-
-	block(string id) {
-		this->id = id;
-	}
-
-	block(string id, String name) {
-		this->id = id;
-		this->name = name;
-	}
-
-	block(string id, String name, int through) {
-		this->id = id;
-		this->name = name;
-		this->through = through;
-	}
-};
-
-bool operator==(const block& a, const block& b) {
-	if (a.id == b.id && a.name == b.name && a.through == b.through) return true;
-	else return false;
-}
-
-bool operator<(const block& a, const block& b) {
-	if (a.id < b.id) {
-		return true;
-	}
-	return false;
-}
+void moveme(vector<vector<block>>& chizu, set<block>& haveItem, vector<pair<int, int>>& walked, pair<int, int>& me, pair<int, int>& after);
 
 void Main()
 {
@@ -148,109 +116,54 @@ void Main()
 		if (KeyUp.down()||KeyW.down()) {
 			pair<int, int> after = { me.first-1,me.second };
 			if (after.first != -1 && chizu[after.first][after.second].id != "#") {
-				bool move = true;
-				if (chizu[after.first][after.second].id == "Key"&& chizu[after.first][after.second].through == 0) {
-					haveItem.insert(chizu[after.first][after.second]);
-					chizu[after.first][after.second].through = 1;
-				}
-
-				if (chizu[after.first][after.second].id == "Door" && chizu[after.first][after.second].through == 0) {
-					if (haveItem.count(block("Key", chizu[after.first][after.second].name, 0))) {
-						haveItem.erase(block("Key", chizu[after.first][after.second].name, 0));
-						chizu[after.first][after.second].through = 1;
-					}
-					else {
-						move = false;
-					}
-				}
-
-				if (move) {
-					if (walked.size() >= 2 && walked[walked.size() - 2] == after) walked.pop_back();
-					else walked.push_back(after);
-					me = after;
-				}
+				moveme(chizu, haveItem, walked, me, after);
 			}
 		}
 		if (KeyDown.down()||KeyS.down()) {
 			pair<int, int> after = { me.first + 1,me.second };
 			if (after.first != N && chizu[after.first][after.second].id != "#") {
-				bool move = true;
-				if (chizu[after.first][after.second].id == "Key" && chizu[after.first][after.second].through == 0) {
-					haveItem.insert(chizu[after.first][after.second]);
-					chizu[after.first][after.second].through = 1;
-				}
-
-				if (chizu[after.first][after.second].id == "Door" && chizu[after.first][after.second].through == 0) {
-					if (haveItem.count(block("Key", chizu[after.first][after.second].name, 0))) {
-						haveItem.erase(block("Key", chizu[after.first][after.second].name, 0));
-						chizu[after.first][after.second].through = 1;
-					}
-					else {
-						move = false;
-					}
-				}
-
-				if (move) {
-					if (walked.size() >= 2 && walked[walked.size() - 2] == after) walked.pop_back();
-					else walked.push_back(after);
-					me = after;
-				}
+				moveme(chizu, haveItem, walked, me, after);
 			}
 		}
 		if (KeyLeft.down()||KeyA.down()) {
 			pair<int, int> after = { me.first ,me.second-1 };
 			if (after.second != -1 && chizu[after.first][after.second].id != "#") {
-				bool move = true;
-				if (chizu[after.first][after.second].id == "Key" && chizu[after.first][after.second].through == 0) {
-					haveItem.insert(chizu[after.first][after.second]);
-					chizu[after.first][after.second].through = 1;
-				}
-
-				if (chizu[after.first][after.second].id == "Door" && chizu[after.first][after.second].through == 0) {
-					if (haveItem.count(block("Key", chizu[after.first][after.second].name, 0))) {
-						haveItem.erase(block("Key", chizu[after.first][after.second].name, 0));
-						chizu[after.first][after.second].through = 1;
-					}
-					else {
-						move = false;
-					}
-				}
-
-				if (move) {
-					if (walked.size() >= 2 && walked[walked.size() - 2] == after) walked.pop_back();
-					else walked.push_back(after);
-					me = after;
-				}
+				moveme(chizu, haveItem, walked, me, after);
 			}
 		}
 		if (KeyRight.down()||KeyD.down()) {
 			pair<int, int> after = { me.first ,me.second+1 };
 			if (after.second != M && chizu[after.first][after.second].id != "#") {
-				bool move = true;
-				if (chizu[after.first][after.second].id == "Key" && chizu[after.first][after.second].through == 0) {
-					haveItem.insert(chizu[after.first][after.second]);
-					chizu[after.first][after.second].through = 1;
-				}
-
-				if (chizu[after.first][after.second].id == "Door" && chizu[after.first][after.second].through == 0) {
-					if (haveItem.count(block("Key", chizu[after.first][after.second].name, 0))) {
-						haveItem.erase(block("Key", chizu[after.first][after.second].name, 0));
-						chizu[after.first][after.second].through = 1;
-					}
-					else {
-						move = false;
-					}
-				}
-
-				if (move) {
-					if (walked.size() >= 2 && walked[walked.size() - 2] == after) walked.pop_back();
-					else walked.push_back(after);
-					me = after;
-				}
+				moveme(chizu, haveItem, walked, me, after);
 			}
 		}
 
 		firstframe = false;
+	}
+}
+
+//可能ならmeをafterに移動させる関数
+void moveme(vector<vector<block>>& chizu,set<block>& haveItem,vector<pair<int,int>>& walked,pair<int,int>& me,pair<int,int>& after) {
+	bool move = true;
+	if (chizu[after.first][after.second].id == "Key" && chizu[after.first][after.second].through == 0) {
+		haveItem.insert(chizu[after.first][after.second]);
+		chizu[after.first][after.second].through = 1;
+	}
+
+	if (chizu[after.first][after.second].id == "Door" && chizu[after.first][after.second].through == 0) {
+		if (haveItem.count(block("Key", chizu[after.first][after.second].name, 0))) {
+			haveItem.erase(block("Key", chizu[after.first][after.second].name, 0));
+			chizu[after.first][after.second].through = 1;
+		}
+		else {
+			move = false;
+		}
+	}
+
+	if (move) {
+		if (walked.size() >= 2 && walked[walked.size() - 2] == after) walked.pop_back();
+		else walked.push_back(after);
+		me = after;
 	}
 }
 
