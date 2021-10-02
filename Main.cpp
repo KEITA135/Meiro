@@ -18,6 +18,7 @@ void Main()
 	int N, M;
 	cin >> N >> M;
 	vector<vector<block>> chizu(N, vector<block>(M));
+	vector<vector<block>> chizu_copy(N, vector<block>(M));
 	const Texture Wall(Resource(U"Wall.jpg"));
 	const Texture Road(Resource(U"Road.jpg"));
 	const Texture Road1(Resource(U"Road1.png"));
@@ -71,6 +72,7 @@ void Main()
 
 	bool firstframe = true;
 	pair<int, int> me = { 0,0 };
+	pair<int, int> me_copy = { 0,0 };
 	vector<pair<int, int>> walked(0);
 	set<block> haveItem;
 	while (System::Update()) {
@@ -143,6 +145,12 @@ void Main()
 		Circle(600.0 / M * (2 * me.second + 1) / 2 + 100, 600.0 / N * (2 * me.first + 1) / 2, min(600.0 / N, 600.0 / M) / 3).drawArc(0_deg,360_deg, min(600.0 / N, 600.0 / M) / 9,0,Palette::Lightgreen).drawFrame(1.0,Palette::Black);
 		Circle(600.0 / M * (2 * me.second + 1) / 2 + 100, 600.0 / N * (2 * me.first + 1) / 2, min(600.0 / N, 600.0 / M) / 9 * 2 - 1).drawFrame(1.0, Palette::Black);
 
+		//Copyの作成
+		if (firstframe) {
+			chizu_copy = chizu;
+			me_copy = me;
+		}
+
 		//移動処理
 		if (KeyUp.down()||KeyW.down()) {
 			pair<int, int> after = { me.first-1,me.second };
@@ -167,6 +175,14 @@ void Main()
 			if (after.second != M && chizu[after.first][after.second].id != "#") {
 				moveme(chizu, haveItem, walked, me, after);
 			}
+		}
+
+		if (KeyR.down()) {
+			chizu = chizu_copy;
+			me = me_copy;
+			walked.clear();
+			haveItem.clear();
+			walked.push_back(me);
 		}
 
 		firstframe = false;
