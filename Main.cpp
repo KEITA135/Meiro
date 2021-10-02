@@ -72,6 +72,8 @@ void Main()
 	Scene::SetBackground(Palette::Cyan);
 	Window::SetTitle(U"Meiro");
 	const Font fontHeavy(30,Typeface::Heavy);
+	const Font GameOver(140, Resource(U"851CHIKARA-YOWAKU_002.ttf"));
+	const Font GameClear(115, Resource(U"NikkyouSans-mLKax.ttf"));
 
 	bool firstframe = true;
 	pair<int, int> me = { 0,0 };
@@ -159,6 +161,19 @@ void Main()
 		Circle(600.0 / M * (2 * me.second + 1) / 2 + 100, 600.0 / N * (2 * me.first + 1) / 2, min(600.0 / N, 600.0 / M) / 3).drawArc(0_deg,360_deg, min(600.0 / N, 600.0 / M) / 9,0,Palette::Lightgreen).drawFrame(1.0,Palette::Black);
 		Circle(600.0 / M * (2 * me.second + 1) / 2 + 100, 600.0 / N * (2 * me.first + 1) / 2, min(600.0 / N, 600.0 / M) / 9 * 2 - 1).drawFrame(1.0, Palette::Black);
 
+
+		//ゲームオーバー画面
+		if (!HP&&chizu[me.first][me.second].id!="g") {
+			Rect(0, 0, 800, 600).draw(Color(0,0,0,120));
+			GameOver(U"Game Over!").drawAt(400, 300, Palette::Red);
+		}
+		
+		//ゲームクリア画面
+		if (chizu[me.first][me.second].id == "g") {
+			Rect(0, 0, 800, 600).draw(Color(255, 255, 255, 120));
+			GameClear(U"Game Clear!").drawAt(400, 300, Palette::Gold);
+		}
+
 		//Copyの作成
 		if (firstframe) {
 			chizu_copy = chizu;
@@ -211,6 +226,7 @@ void moveme(vector<vector<block>>& chizu,set<block>& haveItem,vector<pair<int,in
 	bool move = true;
 
 	if (!HP) move = false;
+	if (chizu[me.first][me.second].id == "g") move = false;
 
 	if (chizu[after.first][after.second].id == "Key" && chizu[after.first][after.second].through == 0) {
 		haveItem.insert(chizu[after.first][after.second]);
