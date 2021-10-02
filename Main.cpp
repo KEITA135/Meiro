@@ -83,6 +83,13 @@ void Main()
 		ClearPrint();
 		if (HP >= 0) Print(U"HP:{}"_fmt(HP));
 		else Print(U"HP:inf");
+		Print(U"Item:");
+		for (block i : haveItem) {
+			String id = U"?";
+			if (i.id == "Key") id = U"Key";
+			Print(U" {} ({})"_fmt(id, i.name));
+		}
+		if (!haveItem.size()) Print(U" None");
 
 		//マップの描画
 		Back.resized(800, 600).draw(0, 0);
