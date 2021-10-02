@@ -31,6 +31,7 @@ void Main()
 	const Texture Back(Resource(U"Back.jpg"));
 	const Texture Key(Emoji(U"🔑"));
 	const Texture Door(Emoji(U"🚪"));
+	const Texture Heart(Emoji(U"❤️"));
 	
 	int question = 0;
 	for (int i = 0;i < N;i++) {
@@ -72,6 +73,7 @@ void Main()
 	Scene::SetBackground(Palette::Cyan);
 	Window::SetTitle(U"Meiro");
 	const Font fontHeavy(30,Typeface::Heavy);
+	const Font HPfont(20, Typeface::Heavy);
 	const Font GameOver(140, Resource(U"851CHIKARA-YOWAKU_002.ttf"));
 	const Font GameClear(115, Resource(U"NikkyouSans-mLKax.ttf"));
 
@@ -83,8 +85,6 @@ void Main()
 	while (System::Update()) {
 		//ステータスの描画
 		ClearPrint();
-		if (HP >= 0) Print(U"HP:{}"_fmt(HP));
-		else Print(U"HP:inf");
 		Print(U"Item:");
 		for (block i : haveItem) {
 			String id = U"?";
@@ -160,7 +160,20 @@ void Main()
 		}
 		Circle(600.0 / M * (2 * me.second + 1) / 2 + 100, 600.0 / N * (2 * me.first + 1) / 2, min(600.0 / N, 600.0 / M) / 3).drawArc(0_deg,360_deg, min(600.0 / N, 600.0 / M) / 9,0,Palette::Lightgreen).drawFrame(1.0,Palette::Black);
 		Circle(600.0 / M * (2 * me.second + 1) / 2 + 100, 600.0 / N * (2 * me.first + 1) / 2, min(600.0 / N, 600.0 / M) / 9 * 2 - 1).drawFrame(1.0, Palette::Black);
-
+		Line(780, 560, 780, 40).draw(LineStyle::RoundCap, 15, Palette::White);
+		if (HP_copy > 0) {
+			Line(780, 560, 780, -520.0 * HP / HP_copy + 560).draw(LineStyle::RoundCap, 15, Palette::Red);
+		}
+		else Line(780, 560, 780, 40).draw(LineStyle::RoundCap, 15, Palette::Red);
+		Heart.resized(20, 20).drawAt(780, 580);
+		if (HP_copy > 0) {
+			HPfont(U"{}"_fmt(HP)).drawAt(782, 22, Palette::Gray);
+			HPfont(U"{}"_fmt(HP)).drawAt(780, 20, Palette::Red);
+		}
+		else {
+			HPfont(U"inf").drawAt(782, 22, Palette::Gray);
+			HPfont(U"inf").drawAt(780, 20, Palette::Red);
+		}
 
 		//ゲームオーバー画面
 		if (!HP&&chizu[me.first][me.second].id!="g") {
