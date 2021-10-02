@@ -57,6 +57,10 @@ Resource(engine/soundfont/GMGSx.sf2.zstdcmp)
 //
 //////////////////////////////////////////////////////
 Resource(Back.jpg)
+Resource(Road1.png)
+Resource(Road2.png)
+Resource(Road3.png)
+Resource(Road4.png)
 Resource(Road.jpg)
 Resource(Wall.jpg)
 

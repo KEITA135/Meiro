@@ -20,6 +20,10 @@ void Main()
 	vector<vector<block>> chizu(N, vector<block>(M));
 	const Texture Wall(Resource(U"Wall.jpg"));
 	const Texture Road(Resource(U"Road.jpg"));
+	const Texture Road1(Resource(U"Road1.png"));
+	const Texture Road2(Resource(U"Road2.png"));
+	const Texture Road3(Resource(U"Road3.png"));
+	const Texture Road4(Resource(U"Road4.png"));
 	const Texture Back(Resource(U"Back.jpg"));
 	const Texture Key(Emoji(U"🔑"));
 	const Texture Door(Emoji(U"🚪"));
@@ -113,24 +117,31 @@ void Main()
 
 				//崩れる足場の描画
 				if (chizu[i][j].id == "Break") {
-					fontHeavy(U"{}"_fmt(chizu[i][j].life - chizu[i][j].through)).draw(600.0 / M * j + 100 + 2, 600.0 / N * i + 2, Palette::Gray);
-					fontHeavy(U"{}"_fmt(chizu[i][j].life - chizu[i][j].through)).draw(600.0 / M * j + 100, 600.0 / N * i);
-
 					//通行可能
-					if (chizu[i][j].through < chizu[i][j].life) {
-						
+					if (chizu[i][j].through < chizu[i][j].life/3) {
+						Road1.resized(600.0 / M, 600.0 / N).draw(600.0 / M * j + 100, 600.0 / N * i);
+					}
+					else if (chizu[i][j].through < chizu[i][j].life/2) {
+						Road2.resized(600.0 / M, 600.0 / N).draw(600.0 / M * j + 100, 600.0 / N * i);
+					}
+					else if (chizu[i][j].through < chizu[i][j].life) {
+						Road3.resized(600.0 / M, 600.0 / N).draw(600.0 / M * j + 100, 600.0 / N * i);
 					}
 					//通行不可
 					else {
-
+						Road4.resized(600.0 / M, 600.0 / N).draw(600.0 / M * j + 100, 600.0 / N * i);
 					}
+
+					fontHeavy(U"{}"_fmt(chizu[i][j].life - chizu[i][j].through)).drawAt(600.0 / M * (2 * j + 1) / 2 + 100 + 2, 600.0 / N * (2 * i + 1) / 2 + 2, Palette::Gray);
+					fontHeavy(U"{}"_fmt(chizu[i][j].life - chizu[i][j].through)).drawAt(600.0 / M * (2 * j + 1) / 2 + 100, 600.0 / N * (2 * i + 1) / 2);
 				}
 			}
 		}
 		for (int i = 1;i < walked.size();i++) {
 			Line(600.0 / M * (2 * walked[i - 1].second + 1) / 2 + 100, 600.0 / N * (2 * walked[i - 1].first + 1) / 2, 600.0 / M * (2 * walked[i].second + 1) / 2 + 100, 600.0 / N * (2 * walked[i].first + 1) / 2).draw(5.0, Palette::Purple);
 		}
-		Circle(600.0 / M * (2 * me.second + 1) / 2 + 100, 600.0 / N * (2 * me.first + 1) / 2, min(600.0 / N, 600.0 / M) / 3).draw(Palette::Lightgreen).drawFrame(1.0,Palette::Black);
+		Circle(600.0 / M * (2 * me.second + 1) / 2 + 100, 600.0 / N * (2 * me.first + 1) / 2, min(600.0 / N, 600.0 / M) / 3).drawArc(0_deg,360_deg, min(600.0 / N, 600.0 / M) / 9,0,Palette::Lightgreen).drawFrame(1.0,Palette::Black);
+		Circle(600.0 / M * (2 * me.second + 1) / 2 + 100, 600.0 / N * (2 * me.first + 1) / 2, min(600.0 / N, 600.0 / M) / 9 * 2 - 1).drawFrame(1.0, Palette::Black);
 
 		//移動処理
 		if (KeyUp.down()||KeyW.down()) {
