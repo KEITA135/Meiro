@@ -7,7 +7,7 @@
 # include "App/block.h"
 using namespace std;
 
-void moveme(vector<vector<block>>& chizu, set<block>& haveItem, vector<pair<int, int>>& walked, pair<int, int>& me, pair<int, int>& after);
+void moveme(vector<vector<block>>& chizu, set<block>& haveItem, vector<pair<int, int>>& walked, pair<int, int>& me, pair<int, int>& after, int& HP);
 
 void Main()
 {
@@ -17,6 +17,9 @@ void Main()
 	cin.rdbuf(in.rdbuf());
 	int N, M;
 	cin >> N >> M;
+	int HP,HP_copy;
+	cin >> HP;
+	HP_copy = HP;
 	vector<vector<block>> chizu(N, vector<block>(M));
 	vector<vector<block>> chizu_copy(N, vector<block>(M));
 	const Texture Wall(Resource(U"Wall.jpg"));
@@ -76,6 +79,10 @@ void Main()
 	vector<pair<int, int>> walked(0);
 	set<block> haveItem;
 	while (System::Update()) {
+		//ステータスの描画
+		ClearPrint();
+		if (HP >= 0) Print(U"HP:{}"_fmt(HP));
+		else Print(U"HP:inf");
 
 		//マップの描画
 		Back.resized(800, 600).draw(0, 0);
@@ -155,31 +162,34 @@ void Main()
 		if (KeyUp.down()||KeyW.down()) {
 			pair<int, int> after = { me.first-1,me.second };
 			if (after.first != -1 && chizu[after.first][after.second].id != "#") {
-				moveme(chizu, haveItem, walked, me, after);
+				moveme(chizu, haveItem, walked, me, after, HP);
 			}
 		}
 		if (KeyDown.down()||KeyS.down()) {
 			pair<int, int> after = { me.first + 1,me.second };
 			if (after.first != N && chizu[after.first][after.second].id != "#") {
-				moveme(chizu, haveItem, walked, me, after);
+				moveme(chizu, haveItem, walked, me, after, HP);
 			}
 		}
 		if (KeyLeft.down()||KeyA.down()) {
 			pair<int, int> after = { me.first ,me.second-1 };
 			if (after.second != -1 && chizu[after.first][after.second].id != "#") {
-				moveme(chizu, haveItem, walked, me, after);
+				moveme(chizu, haveItem, walked, me, after, HP);
 			}
 		}
 		if (KeyRight.down()||KeyD.down()) {
 			pair<int, int> after = { me.first ,me.second+1 };
 			if (after.second != M && chizu[after.first][after.second].id != "#") {
-				moveme(chizu, haveItem, walked, me, after);
+				moveme(chizu, haveItem, walked, me, after, HP);
 			}
 		}
 
+
+		//ゲームリセット
 		if (KeyR.down()) {
 			chizu = chizu_copy;
 			me = me_copy;
+			HP = HP_copy;
 			walked.clear();
 			haveItem.clear();
 			walked.push_back(me);
@@ -190,8 +200,11 @@ void Main()
 }
 
 //可能ならmeをafterに移動させる関数
-void moveme(vector<vector<block>>& chizu,set<block>& haveItem,vector<pair<int,int>>& walked,pair<int,int>& me,pair<int,int>& after) {
+void moveme(vector<vector<block>>& chizu,set<block>& haveItem,vector<pair<int,int>>& walked,pair<int,int>& me,pair<int,int>& after,int& HP) {
 	bool move = true;
+
+	if (!HP) move = false;
+
 	if (chizu[after.first][after.second].id == "Key" && chizu[after.first][after.second].through == 0) {
 		haveItem.insert(chizu[after.first][after.second]);
 		chizu[after.first][after.second].through = 1;
@@ -218,6 +231,7 @@ void moveme(vector<vector<block>>& chizu,set<block>& haveItem,vector<pair<int,in
 		if (walked.size() >= 2 && walked[walked.size() - 2] == after) walked.pop_back();
 		else walked.push_back(after);
 		me = after;
+		HP--;
 	}
 }
 
